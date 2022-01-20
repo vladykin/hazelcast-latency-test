@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hz-reader
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  containers:
+    - name: loadgen
+      image: hazelcast-load-generator:latest
+      imagePullPolicy: IfNotPresent
+      args:
+        - "--cluster=hazelcast:5701"
+        - "--op=READ"
+        - "--rate=1000"
+      resources:
+        requests:
+          cpu: "2"
+          memory: "4Gi"
+      ports:
+        - containerPort: 8080
+          name: http-endpoint
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: hz-writer
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "8080"
+spec:
+  containers:
+    - name: loadgen
+      image: hazelcast-load-generator:latest
+      imagePullPolicy: IfNotPresent
+      args:
+        - "--cluster=hazelcast:5701"
+        - "--op=WRITE"
+        - "--write-size=10240"
+        - "--rate=1000"
+      resources:
+        requests:
+          cpu: "2"
+          memory: "4Gi"
+      ports:
+        - containerPort: 8080
+          name: http-endpoint
